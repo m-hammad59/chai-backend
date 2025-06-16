@@ -5,6 +5,23 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 
+const generateAccessAndRefereshToken = async(userId) => {
+
+    const user = await User.findById(userId)
+    
+    const accessToken = user.generateAccessToken
+   
+   const refreshToken =  user.generateRefreshToken
+
+
+  try {
+    
+  } catch (error) {
+    throw new ApiError(500, "Something went wrong while generating referesh and access token")
+  }
+
+}
+
 
 const registerUser = asyncHandler(async(req, res) => {
   const { fullName, email, username, password }  = req.body
@@ -75,4 +92,37 @@ const registerUser = asyncHandler(async(req, res) => {
 
 })
 
-export {registerUser}
+
+const loginUser = asyncHandler(async (req, res) => {
+
+    const {email, username, password} = req.body
+
+    if (!username || !email) {
+        throw new ApiError(400, "Username or password is required")
+    }
+
+   const user = await User.findOne({
+      $or: [{username}, {email}]
+    })
+
+    if (!user) {
+      throw new ApiError(404, "user doesnot exist")
+    }
+
+  const isPasswordValid =  await user.isPasswordCorrect(password)
+
+
+    if (!isPasswordValid) {
+      throw new ApiError(401, "Invalid user credentials")
+    }
+
+
+
+
+})
+
+
+export {
+  registerUser,
+  loginUser
+}
